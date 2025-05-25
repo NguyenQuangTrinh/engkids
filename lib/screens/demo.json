@@ -1,0 +1,142 @@
+[
+  {
+    "id": "ha_001",
+    "term": "Refrigerator",
+    "definition": "Tủ lạnh",
+    "exampleSentence": "We keep our food fresh in the refrigerator.",
+    "phonetic": "/rɪˈfrɪdʒəreɪtər/"
+  },
+  {
+    "id": "ha_002",
+    "term": "Washing machine",
+    "definition": "Máy giặt",
+    "exampleSentence": "I need to do laundry with the washing machine.",
+    "phonetic": "/ˈwɒʃɪŋ məˈʃiːn/"
+  },
+  {
+    "id": "ha_003",
+    "term": "Microwave oven",
+    "definition": "Lò vi sóng",
+    "exampleSentence": "She heated up leftovers in the microwave oven.",
+    "phonetic": "/ˈmaɪkrəweɪv ˈʌvən/"
+  },
+  {
+    "id": "ha_004",
+    "term": "Vacuum cleaner",
+    "definition": "Máy hút bụi",
+    "exampleSentence": "The vacuum cleaner helps keep the carpets clean.",
+    "phonetic": "/ˈvækjuːm ˈkliːnər/"
+  },
+  {
+    "id": "ha_005",
+    "term": "Television",
+    "definition": "Ti vi, Truyền hình",
+    "exampleSentence": "We watch our favorite shows on the television.",
+    "phonetic": "/ˈtɛlɪvɪʒən/"
+  },
+  {
+    "id": "ha_006",
+    "term": "Air conditioner",
+    "definition": "Máy điều hòa không khí (Máy lạnh)",
+    "exampleSentence": "It's so hot, let's turn on the air conditioner.",
+    "phonetic": "/ˈɛər kənˈdɪʃənər/"
+  },
+  {
+    "id": "ha_007",
+    "term": "Fan",
+    "definition": "Quạt máy",
+    "exampleSentence": "The ceiling fan circulates the air in the room.",
+    "phonetic": "/fæn/"
+  },
+  {
+    "id": "ha_008",
+    "term": "Toaster",
+    "definition": "Máy nướng bánh mì (lát)",
+    "exampleSentence": "I use the toaster to make crispy bread for breakfast.",
+    "phonetic": "/ˈtoʊstər/"
+  },
+  {
+    "id": "ha_009",
+    "term": "Blender",
+    "definition": "Máy xay sinh tố",
+    "exampleSentence": "She made a smoothie with the blender.",
+    "phonetic": "/ˈblɛndər/"
+  },
+  {
+    "id": "ha_010",
+    "term": "Kettle",
+    "definition": "Ấm đun nước (siêu tốc)",
+    "exampleSentence": "I'll boil some water in the kettle for tea.",
+    "phonetic": "/ˈkɛtəl/"
+  },
+  {
+    "id": "ha_011",
+    "term": "Oven",
+    "definition": "Lò nướng",
+    "exampleSentence": "We baked a cake in the oven.",
+    "phonetic": "/ˈʌvən/"
+  },
+  {
+    "id": "ha_012",
+    "term": "Dishwasher",
+    "definition": "Máy rửa bát",
+    "exampleSentence": "Using a dishwasher saves a lot of time.",
+    "phonetic": "/ˈdɪʃˌwɒʃər/"
+  },
+  {
+    "id": "ha_013",
+    "term": "Iron",
+    "definition": "Bàn là, Bàn ủi",
+    "exampleSentence": "He needs to iron his shirt before the meeting.",
+    "phonetic": "/ˈaɪərn/"
+  },
+  {
+    "id": "ha_014",
+    "term": "Hair dryer",
+    "definition": "Máy sấy tóc",
+    "exampleSentence": "She used a hair dryer to dry her wet hair.",
+    "phonetic": "/ˈhɛər ˌdraɪər/"
+  },
+  {
+    "id": "ha_015",
+    "term": "Stove",
+    "definition": "Bếp nấu (thường là bếp lò)",
+    "exampleSentence": "Mom is cooking dinner on the stove.",
+    "phonetic": "/stoʊv/"
+  },
+  {
+    "id": "ha_016",
+    "term": "Coffee maker",
+    "definition": "Máy pha cà phê",
+    "exampleSentence": "He makes fresh coffee every morning with the coffee maker.",
+    "phonetic": "/ˈkɒfi ˌmeɪkər/"
+  },
+  {
+    "id": "ha_017",
+    "term": "Rice cooker",
+    "definition": "Nồi cơm điện",
+    "exampleSentence": "The rice cooker makes perfect rice automatically.",
+    "phonetic": "/ˈraɪs ˌkʊkər/"
+  },
+  {
+    "id": "ha_018",
+    "term": "Lamp",
+    "definition": "Đèn (để bàn, đèn ngủ)",
+    "exampleSentence": "She turned on the lamp to read a book.",
+    "phonetic": "/læmp/"
+  },
+  {
+    "id": "ha_019",
+    "term": "Humidifier",
+    "definition": "Máy tạo độ ẩm",
+    "exampleSentence": "A humidifier can help with dry air in the winter.",
+    "phonetic": "/hjuːˈmɪdɪfaɪər/"
+  },
+  {
+    "id": "ha_020",
+    "term": "Speaker",
+    "definition": "Loa",
+    "exampleSentence": "We listened to music through the Bluetooth speaker.",
+    "phonetic": "/ˈspiːkər/"
+  }
+]

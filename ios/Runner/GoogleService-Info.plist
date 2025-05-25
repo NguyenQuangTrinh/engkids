@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>411348856306-ov71vrpv3uag0gt7vud0fbobvc6uhcis.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.411348856306-ov71vrpv3uag0gt7vud0fbobvc6uhcis</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC0zR1zTXE8-jaMj_02s4-kSgwxZw91WY8</string>
+	<key>GCM_SENDER_ID</key>
+	<string>411348856306</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.engkids</string>
+	<key>PROJECT_ID</key>
+	<string>engkids-ee926</string>
+	<key>STORAGE_BUCKET</key>
+	<string>engkids-ee926.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:411348856306:ios:89e6bbd83be6ba417ecf6b</string>
+</dict>
+</plist>

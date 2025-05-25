@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "411348856306",
+    "project_id": "engkids-ee926",
+    "storage_bucket": "engkids-ee926.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411348856306:android:afd9fcfd100fc2847ecf6b",
+        "android_client_info": {
+          "package_name": "com.example.engkids"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "411348856306-rt3p181qu4487pcn8p7poo3lj95ol5ls.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUsTTEPqdM_fsgdLGHBIoI1yoHJGlror0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "411348856306-rt3p181qu4487pcn8p7poo3lj95ol5ls.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "411348856306-ov71vrpv3uag0gt7vud0fbobvc6uhcis.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.engkids"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
