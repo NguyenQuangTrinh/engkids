@@ -1,3 +1,5 @@
+// lib/screens/loading_screen.dart
+
 import 'dart:io'; // Cần thiết để lấy tên file
 import 'dart:async';
 import 'dart:developer' as developer; // Cho logging

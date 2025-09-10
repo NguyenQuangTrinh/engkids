@@ -1,3 +1,5 @@
+// lib/widgets/home/activity_card.dart
+
 import 'package:flutter/material.dart';
 
 class ActivityCard extends StatelessWidget {

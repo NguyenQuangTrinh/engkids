@@ -1,3 +1,5 @@
+// lib/widgets/home/feature_button_small.dart
+
 import 'package:flutter/material.dart';
 
 class FeatureButtonSmall extends StatelessWidget {

@@ -1,6 +1,8 @@
+// lib/widgets/vocabulary/word_scramble/scrambled_letters_display_widget.dart
+
 import 'package:flutter/material.dart';
 import '../scrambled_letter_tile_widget.dart';
-import '../../../screens/vocabulary/word_scramble_screen.dart'; // Để dùng ScrambledLetter
+import '../../../providers/word_scramble_provider.dart'; // <<< SỬA IMPORT Ở ĐÂY
 
 
 class ScrambledLettersDisplayWidget extends StatelessWidget {
@@ -17,9 +19,9 @@ class ScrambledLettersDisplayWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text("Chọn các chữ cái:",
+        const Text("Chọn các chữ cái:",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 4.0,

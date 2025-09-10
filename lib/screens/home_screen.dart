@@ -1,56 +1,49 @@
-import 'dart:developer' as developer;
+// lib/screens/home_screen.dart
 
+import 'package:engkids/providers/auth_provider.dart';
+import 'package:engkids/screens/friend_requests_screen.dart';
+import 'package:engkids/screens/history_screen.dart';
 import 'package:engkids/screens/question_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/section_title.dart';
 import 'achievements_screen.dart';
 import 'vocabulary/fun_vocabulary_menu_screen.dart';
 import 'library_screen.dart';
 import 'loading_screen.dart';
-import 'settings_screen.dart';
 import '../widgets/home_screen_header.dart';
 import '../widgets/home/greeting_mascot_section.dart';
 import '../widgets/home/continue_learning_card.dart';
 import '../widgets/home/activity_grid_section.dart';
 import '../widgets/home/tools_support_section.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  HomeScreenState createState() => HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen>
+// <<< THAY ĐỔI 2: Kế thừa ConsumerState
+class _HomeScreenState extends ConsumerState<HomeScreen>
     with SingleTickerProviderStateMixin {
+  // Logic của AnimationController được giữ nguyên
   late AnimationController _animationController;
   late Animation<double> _iconAnimation;
-  String? _userName;
-  static const String _logName =
-      'com.engkids.homescreen'; // Thêm log name cho HomeScreen
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
     _iconAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-    _loadUserName();
-  }
-
-  Future<void> _loadUserName() async {
-    // TODO: Logic lấy tên người dùng
-    if (mounted) {
-      setState(() {
-        _userName = null; /* Hoặc "EngKid" */
-      });
-    }
+    // Không cần _loadUserName() nữa, Riverpod sẽ lo việc này
   }
 
   @override
@@ -81,19 +74,10 @@ class HomeScreenState extends State<HomeScreen>
               ),
             );
 
-        developer.log(
-          "HomeScreen: LoadingScreen đã pop. Kết quả questions: ${questionsFromLoading?.length ?? 'null'} câu",
-          name: _logName,
-        );
-
         // Nếu có câu hỏi trả về, điều hướng sang QuestionScreen
         if (questionsFromLoading != null &&
             questionsFromLoading.isNotEmpty &&
             mounted) {
-          developer.log(
-            "HomeScreen: Điều hướng sang QuestionScreen.",
-            name: _logName,
-          );
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -104,21 +88,9 @@ class HomeScreenState extends State<HomeScreen>
         } else if (questionsFromLoading == null && mounted) {
           // LoadingScreen có thể đã pop với null do lỗi hoặc không có câu hỏi
           // SnackBar lỗi có thể đã được hiển thị bởi LoadingScreen
-          developer.log(
-            "HomeScreen: Không nhận được câu hỏi từ LoadingScreen hoặc có lỗi.",
-            name: _logName,
-          );
         }
-      } else {
-        developer.log("HomeScreen: Người dùng hủy chọn file.", name: _logName);
-      }
-    } catch (e, s) {
-      developer.log(
-        "HomeScreen: Lỗi khi chọn file: $e",
-        name: _logName,
-        error: e,
-        stackTrace: s,
-      );
+      } else {}
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -145,10 +117,13 @@ class HomeScreenState extends State<HomeScreen>
     final Color engColor = Colors.redAccent[700] ?? Colors.red;
     final Color kidsColor = Colors.green[700] ?? Colors.green;
 
-    String greeting =
-        _userName == null || _userName!.trim().isEmpty
+    final authState = ref.watch(authStateChangesProvider);
+    final user = authState.asData?.value;
+
+    final String greeting =
+        user?.displayName == null || user!.displayName!.isEmpty
             ? "Luyện tập tiếng Anh hiệu quả!"
-            : "Xin chào, $_userName!";
+            : "Xin chào, ${user.displayName}!";
 
     // Tạo danh sách dữ liệu cho ActivityGridSection
     final List<ActivityItemData> activityItems = [
@@ -202,9 +177,34 @@ class HomeScreenState extends State<HomeScreen>
     // Tạo danh sách dữ liệu cho ToolsSupportSection
     final List<FeatureButtonData> featureButtons = [
       FeatureButtonData(
+        icon: Icons.group_rounded,
+        label: "Friend",
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FriendsScreen()),
+          );
+        },
+      ),
+      // FeatureButtonData(
+      //   icon: Icons.group_add_rounded,
+      //   label: "Tìm bạn",
+      //   onPressed: () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (context) => const FindFriendsScreen()),
+      //     );
+      //   },
+      // ),
+      FeatureButtonData(
         icon: Icons.history_rounded,
         label: "Lịch sử",
-        onPressed: () => _showComingSoon(context, "Lịch sử"),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HistoryScreen()),
+          );
+        },
       ),
       FeatureButtonData(
         icon: Icons.military_tech_rounded,
@@ -253,16 +253,6 @@ class HomeScreenState extends State<HomeScreen>
                     engColor: engColor,
                     kidsColor: kidsColor,
                     logoFontFamily: 'Comic Sans MS',
-                    onSettingsPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SettingsScreen(),
-                        ),
-                      );
-                    },
-                    onProfilePressed:
-                        () => _showComingSoon(context, "Tài khoản"),
                   ),
                 ),
               ),

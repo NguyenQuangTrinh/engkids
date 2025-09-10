@@ -1,3 +1,5 @@
+// lib/widgets/home/activity_grid_section.dart
+
 import 'package:flutter/material.dart';
 import 'activity_card.dart'; // Import ActivityCard
 

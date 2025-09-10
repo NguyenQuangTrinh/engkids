@@ -1,6 +1,7 @@
-import 'package:engkids/screens/home_screen.dart';
+import 'package:engkids/widgets/auth_wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 // Import màn hình chính
@@ -12,7 +13,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Comic Sans MS', // Nhớ thêm font vào pubspec.yaml và assets
         visualDensity: VisualDensity.adaptivePlatformDensity, // Thích ứng giao diện
       ),
-      home: HomeScreen(), // Gọi màn hình câu hỏi
+      home: AuthWrapper(), // Gọi màn hình câu hỏi
       debugShowCheckedModeBanner: false, // Ẩn banner debug
         navigatorObservers: [routeObserver]
     );

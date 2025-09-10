@@ -1,3 +1,5 @@
+// lib/models/high_score_model.dart
+
 import 'package:flutter/foundation.dart';
 
 @immutable

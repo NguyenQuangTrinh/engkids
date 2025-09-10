@@ -1,21 +1,27 @@
-import 'package:engkids/screens/vocabulary/vocabulary_set_management_screen.dart';
-import 'package:engkids/screens/vocabulary/word_scramble_screen.dart';
-import 'package:flutter/material.dart';
-import 'dart:developer' as developer; // Cho logging
-import '../../models/flashcard_item_model.dart';
-import '../../service/vocabulary_database_service.dart';
-import '../../widgets/vocabulary/vocabulary_game_card.dart';
-import 'flashcard_screen.dart';
-import 'matching_game_screen.dart'; // Import widget thẻ game
+// lib/screens/vocabulary/fun_vocabulary_menu_screen.dart
 
-// Định nghĩa kiểu dữ liệu cho mỗi mục game để dễ quản lý
+import 'package:engkids/models/flashcard_item_model.dart';
+import 'package:engkids/providers/game_selection_provider.dart';
+import 'package:engkids/providers/vocabulary_providers.dart';
+import 'package:engkids/screens/game/listen_type_game_screen.dart';
+import 'package:engkids/screens/vocabulary/flashcard_screen.dart';
+import 'package:engkids/screens/vocabulary/game_set_selection_screen.dart';
+import 'package:engkids/screens/vocabulary/matching_game_screen.dart';
+import 'package:engkids/screens/vocabulary/vocabulary_set_management_screen.dart';
+import 'package:engkids/screens/vocabulary/word_guess_screen.dart';
+import 'package:engkids/screens/vocabulary/word_scramble_screen.dart';
+import 'package:engkids/service/firebase_vocabulary_service.dart';
+import 'package:engkids/widgets/vocabulary/vocabulary_game_card.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// Class helper để định nghĩa các mục trong menu
 class GameMenuItem {
   final String title;
   final String description;
   final IconData iconData;
   final Color cardColor;
-  final String
-  featureKey; // Key để nhận diện game, dùng cho navigation hoặc coming soon
+  final String featureKey;
 
   GameMenuItem({
     required this.title,
@@ -26,214 +32,189 @@ class GameMenuItem {
   });
 }
 
-class FunVocabularyMenuScreen extends StatefulWidget {
+class FunVocabularyMenuScreen extends ConsumerWidget {
   const FunVocabularyMenuScreen({super.key});
 
-  @override
-  FunVocabularyMenuScreenState createState() => FunVocabularyMenuScreenState();
-}
-
-class FunVocabularyMenuScreenState extends State<FunVocabularyMenuScreen> {
-  static const String _logName = 'com.engkids.funvocabularymenu';
-  bool _isLoadingRandomFlashcards = false;
-  final VocabularyDatabaseService _vocabDbService =
-      VocabularyDatabaseService.instance;
-
-  // Danh sách các trò chơi (sẽ được mở rộng)
-  late final List<GameMenuItem> _gameItems;
-
-  @override
-  void initState() {
-    super.initState();
-    _gameItems = _buildGameMenuItems();
+  // Hàm build danh sách các game, tách ra cho gọn
+  List<GameMenuItem> _buildGameMenuItems() {
+    return [
+      GameMenuItem(
+        title: "Quản lý Bộ Từ Vựng",
+        description: "Tạo, nhập, và quản lý các bộ từ của bạn và bạn bè.",
+        iconData: Icons.library_add_check_rounded,
+        cardColor: Colors.blueGrey[500]!,
+        featureKey: "manage_sets",
+      ),
+      GameMenuItem(
+        title: "Thẻ Ghi Nhớ",
+        description: "Ôn tập từ vựng với các thẻ lật thông minh.",
+        iconData: Icons.style_rounded,
+        cardColor: Colors.teal[400]!,
+        featureKey: "flashcards",
+      ),
+      GameMenuItem(
+        title: "Nối Từ Siêu Tốc",
+        description: "Nối từ tiếng Anh với nghĩa tương ứng.",
+        iconData: Icons.compare_arrows_rounded,
+        cardColor: Colors.deepOrange[400]!,
+        featureKey: "matching_game",
+      ),
+      GameMenuItem(
+        title: "Giải Đố Chữ",
+        description: "Sắp xếp các chữ cái thành từ đúng.",
+        iconData: Icons.shuffle_rounded,
+        cardColor: Colors.lightBlue[400]!,
+        featureKey: "word_scramble",
+      ),
+      GameMenuItem(
+        title: "Đoán Từ Bí Ẩn",
+        description: "Thử thách trí tuệ với trò chơi đoán từ.",
+        iconData: Icons.visibility_off_rounded,
+        cardColor: Colors.purple[400]!,
+        featureKey: "word_guess",
+      ),
+      GameMenuItem(
+        title: "Nghe và Gõ",
+        description: "Luyện kỹ năng nghe và viết chính tả.",
+        iconData: Icons.hearing_rounded,
+        cardColor: Colors.cyan[600]!,
+        featureKey: "listen_and_type",
+      ),
+    ];
   }
 
-  Future<void> _handleMenuItemTap(String featureKey) async {
-    developer.log("Menu item tapped: $featureKey", name: _logName);
-
+  // Hàm xử lý khi nhấn vào một mục game
+  Future<void> _handleMenuItemTap(
+    BuildContext context,
+    WidgetRef ref,
+    String featureKey,
+  ) async {
+    // Xử lý riêng cho mục "Quản lý"
     if (featureKey == 'manage_sets') {
-      // <<< XỬ LÝ CHO MỤC MỚI
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => const VocabularySetManagementScreen(),
         ),
       );
-    } else if (featureKey == 'flashcards') {
-      if (_isLoadingRandomFlashcards) return; // Tránh nhấn nhiều lần
+      return;
+    }
 
-      setState(() {
-        _isLoadingRandomFlashcards = true;
-      });
+    // Hiển thị loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
 
-      List<FlashcardItem> randomItems = await _vocabDbService
-          .getRandomVocabularyItems(limit: 15);
+    try {
+      List<FlashcardItem> gameItems;
+      String gameTitle;
 
-      if (!mounted) return; // Kiểm tra sau await
-      setState(() {
-        _isLoadingRandomFlashcards = false;
-      });
+      // Lấy danh sách bộ từ đã chọn từ provider
+      final selectedSets = ref.read(gameSelectionProvider).asData?.value ?? {};
 
-      if (randomItems.isNotEmpty) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => FlashcardScreen(
-                  flashcards: randomItems,
-                  setName: "Ôn tập Ngẫu nhiên", // Tên cho bộ từ ngẫu nhiên
-                ),
-          ),
+      if (selectedSets.isNotEmpty) {
+        // Nếu có chọn, lấy từ vựng từ các bộ đó
+        gameItems = await ref.read(
+          combinedVocabularyProvider(selectedSets).future,
         );
+        gameTitle = "Từ vựng Tùy chọn";
       } else {
+        // Nếu không chọn bộ nào, lấy từ ngẫu nhiên
+        gameItems = await FirebaseVocabularyService.instance
+            .getRandomVocabularyItems(limit: 15);
+        gameTitle = "Ôn tập Ngẫu nhiên";
+      }
+
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // Ẩn loading overlay
+
+      // Kiểm tra xem có từ vựng để chơi không
+      if (gameItems.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              "Chưa có từ vựng nào trong thư viện để ôn tập ngẫu nhiên. Hãy thêm bộ từ trước!",
+              "Không có từ vựng nào để chơi. Hãy chọn bộ từ hoặc thêm từ mới!",
             ),
             backgroundColor: Colors.orange,
           ),
         );
+        return;
       }
-    } else if (featureKey == 'matching_game') {
-      if (_isLoadingRandomFlashcards)
-        return; // Đổi tên biến loading cho phù hợp nếu dùng chung
-      setState(() {
-        _isLoadingRandomFlashcards = true;
-      });
 
-      List<FlashcardItem> gameItems = await _vocabDbService
-          .getRandomVocabularyItems(limit: 10);
+      // Điều hướng đến game tương ứng
+      Widget? gameScreen;
+      switch (featureKey) {
+        case 'flashcards':
+          gameScreen = FlashcardScreen(
+            flashcards: gameItems,
+            setName: gameTitle,
+          );
+          break;
+        case 'matching_game':
+          if (gameItems.length < 6) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Cần ít nhất 6 từ để chơi Nối Từ.")),
+            );
+            return;
+          }
+          gameScreen = MatchingGameScreen(
+            vocabularyItems: gameItems,
+            setName: gameTitle,
+          );
+          break;
+        case 'word_scramble':
+          gameScreen = WordScrambleScreen(
+            vocabularyItems: gameItems,
+            setName: gameTitle,
+          );
+          break;
+        case 'word_guess':
+          gameScreen = WordGuessScreen(
+            vocabularyItems: gameItems,
+            setName: gameTitle,
+          );
+        case 'listen_and_type':
+          gameScreen = ListenTypeGameScreen(
+            vocabularyItems: gameItems,
+            setName: gameTitle,
+          );
+          break;
+      }
 
-      if (!mounted) return;
-      setState(() {
-        _isLoadingRandomFlashcards = false;
-      });
-
-      if (gameItems.length >= 2) {
-        // Cần ít nhất 2 item để chơi matching
+      if (gameScreen != null && context.mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder:
-                (context) => MatchingGameScreen(
-                  vocabularyItems: gameItems,
-                  setName: "Nối Từ Ngẫu Nhiên",
-                ),
-          ),
+          MaterialPageRoute(builder: (context) => gameScreen!),
         );
-      } else {
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Ẩn loading overlay
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Không đủ từ vựng để chơi trò nối từ (cần ít nhất 2 từ).",
-            ),
-            backgroundColor: Colors.orange,
+          SnackBar(
+            content: Text("Lỗi chuẩn bị game: $e"),
+            backgroundColor: Colors.red,
           ),
         );
       }
-    } else if(featureKey == 'word_scramble'){
-      if (_isLoadingRandomFlashcards) return;
-      setState(() { _isLoadingRandomFlashcards = true; });
-
-      // Lấy từ ngẫu nhiên, ví dụ 5 từ cho word scramble
-      List<FlashcardItem> gameItems = await _vocabDbService.getRandomVocabularyItems(limit: 5);
-
-      if (!mounted) return;
-      setState(() { _isLoadingRandomFlashcards = false; });
-
-      if (gameItems.isNotEmpty) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WordScrambleScreen(
-              vocabularyItems: gameItems,
-              setName: "Đố Chữ Ngẫu Nhiên",
-            ),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Không đủ từ vựng để chơi Đố Chữ."), backgroundColor: Colors.orange),
-        );
-      }
-    } else {
-      _showComingSoon(context, "Chức năng '$featureKey'");
     }
   }
 
-  void _showComingSoon(BuildContext context, String featureName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$featureName sắp ra mắt!'),
-        backgroundColor: Colors.blueGrey,
-        duration: const Duration(seconds: 1),
-      ),
-    );
-  }
-
-  // Hàm tạo danh sách các mục game
-  List<GameMenuItem> _buildGameMenuItems() {
-    return [
-      GameMenuItem(
-        // <<< MỤC MỚI HOẶC THAY THẾ MỤC "CHỌN BỘ TỪ" CŨ
-        title: "Quản lý Bộ Từ Vựng",
-        description: "Tạo, nhập từ file JSON, và quản lý các bộ từ của bạn.",
-        iconData: Icons.library_add_check_rounded,
-        cardColor: Colors.blueGrey[500]!,
-        featureKey: "manage_sets", // Một key mới
-      ),
-      GameMenuItem(
-        title: "Thẻ Ghi Nhớ Thông Minh",
-        description: "Ôn tập từ vựng với thẻ lật và lặp lại ngắt quãng.",
-        iconData: Icons.style_rounded, // Icon cho flashcards
-        cardColor: Colors.teal[400]!,
-        featureKey: "flashcards",
-      ),
-      GameMenuItem(
-        title: "Nối Từ Siêu Tốc",
-        description: "Nối từ tiếng Anh với nghĩa hoặc hình ảnh tương ứng.",
-        iconData: Icons.compare_arrows_rounded, // Icon cho matching
-        cardColor: Colors.deepOrange[400]!,
-        featureKey: "matching_game",
-      ),
-      GameMenuItem(
-        title: "Giải Đố Chữ",
-        description: "Sắp xếp các chữ cái lộn xộn thành từ đúng.",
-        iconData: Icons.shuffle_rounded, // Icon cho word scramble
-        cardColor: Colors.lightBlue[400]!,
-        featureKey: "word_scramble",
-      ),
-      GameMenuItem(
-        title: "Đoán Từ Bí Ẩn",
-        description: "Thử thách trí tuệ với trò chơi đoán từ cổ điển.",
-        iconData: Icons.visibility_off_rounded, // Icon cho word guess
-        cardColor: Colors.purple[400]!,
-        featureKey: "word_guess",
-      ),
-      GameMenuItem(
-        title: "Trắc Nghiệm Từ Vựng",
-        description:
-            "Kiểm tra kiến thức từ vựng qua các câu hỏi nhiều lựa chọn.",
-        iconData: Icons.quiz_rounded, // Icon cho MCQ
-        cardColor: Colors.green[500]!,
-        featureKey: "vocabulary_quiz",
-      ),
-      // Thêm các game khác ở đây
-    ];
-  }
-
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Lắng nghe lựa chọn đã lưu để hiển thị
+    final gameSelection = ref.watch(gameSelectionProvider);
+    final gameItems = _buildGameMenuItems();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Từ Vựng Vui"),
-        backgroundColor: Colors.indigoAccent, // Màu riêng cho khu vực này
+        backgroundColor: Colors.indigoAccent,
       ),
       body: Container(
         decoration: BoxDecoration(
-          // Thêm nền gradient nhẹ
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -243,7 +224,7 @@ class FunVocabularyMenuScreenState extends State<FunVocabularyMenuScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // TODO: Placeholder cho phần chọn bộ từ vựng (sẽ làm sau)
+            // Card chọn bộ từ vựng
             Card(
               elevation: 2,
               margin: const EdgeInsets.only(bottom: 20.0),
@@ -252,24 +233,47 @@ class FunVocabularyMenuScreenState extends State<FunVocabularyMenuScreen> {
                   Icons.collections_bookmark_outlined,
                   color: Theme.of(context).primaryColor,
                 ),
-                title: Text(
-                  "Chọn Bộ Từ Vựng",
+                title: const Text(
+                  "Chọn Bộ Từ Vựng Chơi Game",
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),
-                subtitle: Text("Mặc định: Tất cả từ / Từ bài học gần nhất"),
-                trailing: Icon(Icons.arrow_drop_down_rounded),
-                onTap: () => _showComingSoon(context, "Chọn bộ từ vựng"),
+                subtitle: gameSelection.when(
+                  data: (sets) {
+                    if (sets.isEmpty)
+                      return const Text("Chế độ: Ngẫu nhiên tất cả từ vựng");
+                    return Text(
+                      "Đã chọn: ${sets.map((s) => s.name).join(', ')}",
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    );
+                  },
+                  loading: () => const Text("Đang tải lựa chọn..."),
+                  error:
+                      (e, s) => const Text(
+                        "Lỗi tải lựa chọn",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const GameSetSelectionScreen(),
+                    ),
+                  );
+                },
               ),
             ),
 
             // Danh sách các trò chơi
-            ..._gameItems.map((item) {
+            ...gameItems.map((item) {
               return VocabularyGameCard(
                 title: item.title,
                 description: item.description,
                 iconData: item.iconData,
                 cardColor: item.cardColor,
-                onTap: () => _handleMenuItemTap(item.featureKey),
+                onTap: () => _handleMenuItemTap(context, ref, item.featureKey),
               );
             }),
           ],

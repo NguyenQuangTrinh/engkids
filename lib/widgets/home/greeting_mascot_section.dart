@@ -1,3 +1,5 @@
+// lib/widgets/home/greeting_mascot_section.dart
+
 import 'package:flutter/material.dart';
 
 class GreetingAndMascotSection extends StatelessWidget {

@@ -1,3 +1,5 @@
+// lib/widgets/vocabulary/word_scramble/hint_display_widget.dart
+
 import 'package:flutter/material.dart';
 
 class HintDisplayWidget extends StatelessWidget {

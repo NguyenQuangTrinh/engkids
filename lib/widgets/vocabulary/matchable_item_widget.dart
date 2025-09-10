@@ -1,4 +1,5 @@
 // lib/widgets/vocabulary/matchable_item_widget.dart
+
 import 'package:flutter/material.dart';
 
 // MatchItemState enum giữ nguyên

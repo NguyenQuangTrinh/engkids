@@ -1,3 +1,5 @@
+// lib/service/vocabulary_database_service.dart
+
 import 'dart:io';
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
@@ -15,14 +17,14 @@ class VocabularyException implements Exception {
   String toString() => 'VocabularyException: $message';
 }
 
-
 class VocabularyDatabaseService {
   static const String _logName = 'com.engkids.vocabularydbservice';
 
   Future<Database> get _db async => await DatabaseManager.instance.database;
 
   VocabularyDatabaseService._privateConstructor();
-  static final VocabularyDatabaseService instance = VocabularyDatabaseService._privateConstructor();
+  static final VocabularyDatabaseService instance =
+      VocabularyDatabaseService._privateConstructor();
 
   Future<int> insertVocabularySet(String name, {String? description}) async {
     final db = await _db;
@@ -33,7 +35,9 @@ class VocabularyDatabaseService {
         DatabaseManager.columnSetDescription: description,
         DatabaseManager.columnSetDateCreated: DateTime.now().toIso8601String(),
       },
-      conflictAlgorithm: ConflictAlgorithm.replace, // Hoặc .ignore nếu không muốn ghi đè tên trùng
+      conflictAlgorithm:
+          ConflictAlgorithm
+              .replace, // Hoặc .ignore nếu không muốn ghi đè tên trùng
     );
     developer.log("Đã tạo bộ từ: '$name' với ID: $setId", name: _logName);
     return setId;
@@ -49,7 +53,10 @@ class VocabularyDatabaseService {
 
     developer.log("Đã lấy ${maps.length} bộ từ vựng", name: _logName);
     if (maps.isEmpty) return [];
-    return List.generate(maps.length, (i) => VocabularySetModel.fromMap(maps[i]));
+    return List.generate(
+      maps.length,
+      (i) => VocabularySetModel.fromMap(maps[i]),
+    );
   }
 
   Future<void> deleteVocabularySet(int setId) async {
@@ -59,7 +66,10 @@ class VocabularyDatabaseService {
       where: '${DatabaseManager.columnSetId} = ?',
       whereArgs: [setId],
     );
-    developer.log("Đã xóa $count bộ từ (ID: $setId) và các từ liên quan (do ON DELETE CASCADE).", name: _logName);
+    developer.log(
+      "Đã xóa $count bộ từ (ID: $setId) và các từ liên quan (do ON DELETE CASCADE).",
+      name: _logName,
+    );
   }
 
   Future<int> insertVocabularyItem(int setId, FlashcardItem item) async {
@@ -80,7 +90,7 @@ class VocabularyDatabaseService {
     return itemId;
   }
 
-  Future<List<FlashcardItem>> getVocabularyItemsBySetId(int setId) async {
+  Future<List<FlashcardItem>> getVocabularyItemsBySetId(String setId) async {
     final db = await _db;
     final List<Map<String, dynamic>> maps = await db.query(
       DatabaseManager.tableVocabularyItems,
@@ -97,12 +107,21 @@ class VocabularyDatabaseService {
         definition: maps[i][DatabaseManager.columnItemDefinition] as String,
         exampleSentence: maps[i][DatabaseManager.columnItemExample] as String?,
         phonetic: maps[i][DatabaseManager.columnItemPhonetic] as String?,
+        partOfSpeech:
+            maps[i][DatabaseManager.columnItemPartOfSpeech] as String?,
       );
     });
   }
 
-  Future<bool> importVocabularyFromJson(String filePath, String setName, {String? setDescription}) async {
-    developer.log("Bắt đầu nhập từ JSON: $filePath cho bộ: $setName", name: _logName);
+  Future<bool> importVocabularyFromJson(
+    String filePath,
+    String setName, {
+    String? setDescription,
+  }) async {
+    developer.log(
+      "Bắt đầu nhập từ JSON: $filePath cho bộ: $setName",
+      name: _logName,
+    );
     final db = await _db; // Lấy DB một lần
 
     try {
@@ -110,19 +129,27 @@ class VocabularyDatabaseService {
       if (jsonString.isEmpty) throw VocabularyException("File JSON rỗng.");
 
       final List<dynamic> jsonList = jsonDecode(jsonString);
-      if (jsonList.isEmpty) throw VocabularyException("File JSON không chứa mục từ vựng nào.");
+      if (jsonList.isEmpty)
+        throw VocabularyException("File JSON không chứa mục từ vựng nào.");
 
       // Kiểm tra tên bộ từ đã tồn tại chưa
       final existingSets = await db.query(
-          DatabaseManager.tableVocabularySets,
-          where: '${DatabaseManager.columnSetName} = ?',
-          whereArgs: [setName]);
+        DatabaseManager.tableVocabularySets,
+        where: '${DatabaseManager.columnSetName} = ?',
+        whereArgs: [setName],
+      );
       if (existingSets.isNotEmpty) {
-        throw VocabularyException("Tên bộ từ '$setName' đã tồn tại. Vui lòng chọn tên khác.");
+        throw VocabularyException(
+          "Tên bộ từ '$setName' đã tồn tại. Vui lòng chọn tên khác.",
+        );
       }
 
-      final int setId = await insertVocabularySet(setName, description: setDescription); // Dùng hàm đã có
-      if (setId <= 0) throw VocabularyException("Không thể tạo bộ từ mới trong database.");
+      final int setId = await insertVocabularySet(
+        setName,
+        description: setDescription,
+      ); // Dùng hàm đã có
+      if (setId <= 0)
+        throw VocabularyException("Không thể tạo bộ từ mới trong database.");
 
       int itemsAddedCount = 0;
       // Sử dụng batch để tăng hiệu suất khi insert nhiều
@@ -132,49 +159,73 @@ class VocabularyDatabaseService {
           final String? term = jsonObj['term'] as String?;
           final String? definition = jsonObj['definition'] as String?;
 
-          if (term != null && term.isNotEmpty && definition != null && definition.isNotEmpty) {
+          if (term != null &&
+              term.isNotEmpty &&
+              definition != null &&
+              definition.isNotEmpty) {
             // Không cần tạo FlashcardItem ở đây nữa, insert trực tiếp Map
-            batch.insert(
-                DatabaseManager.tableVocabularyItems,
-                {
-                  DatabaseManager.columnItemSetId: setId,
-                  DatabaseManager.columnItemTerm: term,
-                  DatabaseManager.columnItemDefinition: definition,
-                  DatabaseManager.columnItemExample: jsonObj['exampleSentence'] as String?,
-                  DatabaseManager.columnItemPhonetic: jsonObj['phonetic'] as String?,
-                  DatabaseManager.columnItemDateAdded: DateTime.now().toIso8601String(),
-                }
-            );
+            batch.insert(DatabaseManager.tableVocabularyItems, {
+              DatabaseManager.columnItemSetId: setId,
+              DatabaseManager.columnItemTerm: term,
+              DatabaseManager.columnItemDefinition: definition,
+              DatabaseManager.columnItemExample:
+                  jsonObj['exampleSentence'] as String?,
+              DatabaseManager.columnItemPhonetic:
+                  jsonObj['phonetic'] as String?,
+              DatabaseManager.columnItemPartOfSpeech:
+                  jsonObj['partOfSpeech'] as String?,
+              DatabaseManager.columnItemDateAdded:
+                  DateTime.now().toIso8601String(),
+            });
             itemsAddedCount++;
           } else {
-            developer.log("Bỏ qua mục từ không hợp lệ trong JSON: $jsonObj", name: _logName);
+            developer.log(
+              "Bỏ qua mục từ không hợp lệ trong JSON: $jsonObj",
+              name: _logName,
+            );
           }
         }
       }
       await batch.commit(noResult: true); // Commit batch
-      developer.log("Đã thêm $itemsAddedCount mục từ vào bộ '$setName' (ID: $setId)", name: _logName);
+      developer.log(
+        "Đã thêm $itemsAddedCount mục từ vào bộ '$setName' (ID: $setId)",
+        name: _logName,
+      );
       return itemsAddedCount > 0;
-
-    } on VocabularyException { rethrow; }
-    catch (e, s) {
-      developer.log("Lỗi khi nhập từ vựng từ JSON: $filePath", name: _logName, error: e, stackTrace: s);
-      throw VocabularyException("Lỗi đọc hoặc phân tích file JSON: ${e.toString()}");
+    } on VocabularyException {
+      rethrow;
+    } catch (e, s) {
+      developer.log(
+        "Lỗi khi nhập từ vựng từ JSON: $filePath",
+        name: _logName,
+        error: e,
+        stackTrace: s,
+      );
+      throw VocabularyException(
+        "Lỗi đọc hoặc phân tích file JSON: ${e.toString()}",
+      );
     }
   }
 
   Future<List<FlashcardItem>> getRandomVocabularyItems({int limit = 15}) async {
     final db = await _db;
-    developer.log("Đang lấy $limit từ vựng ngẫu nhiên từ database.", name: _logName);
+    developer.log(
+      "Đang lấy $limit từ vựng ngẫu nhiên từ database.",
+      name: _logName,
+    );
 
     // Sử dụng RANDOM() của SQLite để lấy các hàng ngẫu nhiên hiệu quả
     final List<Map<String, dynamic>> maps = await db.query(
       DatabaseManager.tableVocabularyItems,
       orderBy: 'RANDOM()', // SQLite sẽ tự sắp xếp ngẫu nhiên
-      limit: limit,        // Giới hạn số lượng kết quả
+      limit: limit, // Giới hạn số lượng kết quả
     );
 
     if (maps.isEmpty) {
-      developer.log("Không tìm thấy từ vựng nào trong database.", name: _logName);
+      developer.log(
+        "Không tìm thấy từ vựng nào trong database.",
+        name: _logName,
+      );
       return [];
     }
 
@@ -185,9 +236,109 @@ class VocabularyDatabaseService {
         definition: maps[i][DatabaseManager.columnItemDefinition] as String,
         exampleSentence: maps[i][DatabaseManager.columnItemExample] as String?,
         phonetic: maps[i][DatabaseManager.columnItemPhonetic] as String?,
+        partOfSpeech:
+            maps[i][DatabaseManager.columnItemPartOfSpeech] as String?,
       );
     });
-    developer.log("Đã lấy được ${randomItems.length} từ vựng ngẫu nhiên.", name: _logName);
+    developer.log(
+      "Đã lấy được ${randomItems.length} từ vựng ngẫu nhiên.",
+      name: _logName,
+    );
     return randomItems;
+  }
+
+  // Thêm hàm mới này vào class VocabularyDatabaseService
+  Future<void> deleteVocabularyItem(int itemId) async {
+    final db = await _db;
+    final count = await db.delete(
+      DatabaseManager.tableVocabularyItems,
+      where: '${DatabaseManager.columnItemId} = ?',
+      whereArgs: [itemId],
+    );
+    developer.log("Đã xóa $count mục từ (ID: $itemId).", name: _logName);
+  }
+
+  Future<bool> importVocabularyFromJsonString(
+    String jsonString,
+    String setName, {
+    String? setDescription,
+  }) async {
+    developer.log(
+      "Bắt đầu nhập từ chuỗi JSON cho bộ: $setName",
+      name: _logName,
+    );
+    final db = await _db;
+
+    try {
+      if (jsonString.isEmpty) throw VocabularyException("Chuỗi JSON rỗng.");
+
+      final List<dynamic> jsonList = jsonDecode(jsonString);
+      if (jsonList.isEmpty)
+        throw VocabularyException("Chuỗi JSON không chứa mục từ vựng nào.");
+
+      // Kiểm tra tên bộ từ đã tồn tại chưa
+      final existingSets = await db.query(
+        DatabaseManager.tableVocabularySets,
+        where: '${DatabaseManager.columnSetName} = ?',
+        whereArgs: [setName],
+      );
+      if (existingSets.isNotEmpty) {
+        throw VocabularyException(
+          "Tên bộ từ '$setName' đã tồn tại. Vui lòng chọn tên khác.",
+        );
+      }
+
+      final int setId = await insertVocabularySet(
+        setName,
+        description: setDescription,
+      );
+      if (setId <= 0)
+        throw VocabularyException("Không thể tạo bộ từ mới trong database.");
+
+      int itemsAddedCount = 0;
+      Batch batch = db.batch();
+      for (var jsonObj in jsonList) {
+        if (jsonObj is Map<String, dynamic>) {
+          final String? term = jsonObj['term'] as String?;
+          final String? definition = jsonObj['definition'] as String?;
+
+          if (term != null &&
+              term.isNotEmpty &&
+              definition != null &&
+              definition.isNotEmpty) {
+            batch.insert(DatabaseManager.tableVocabularyItems, {
+              DatabaseManager.columnItemSetId: setId,
+              DatabaseManager.columnItemTerm: term,
+              DatabaseManager.columnItemDefinition: definition,
+              DatabaseManager.columnItemExample:
+                  jsonObj['exampleSentence'] as String?,
+              DatabaseManager.columnItemPhonetic:
+                  jsonObj['phonetic'] as String?,
+              DatabaseManager.columnItemPartOfSpeech:
+                  jsonObj['partOfSpeech'] as String?,
+              DatabaseManager.columnItemDateAdded:
+                  DateTime.now().toIso8601String(),
+            });
+            itemsAddedCount++;
+          }
+        }
+      }
+      await batch.commit(noResult: true);
+      developer.log(
+        "Đã thêm $itemsAddedCount mục từ vào bộ '$setName' (ID: $setId)",
+        name: _logName,
+      );
+      return itemsAddedCount > 0;
+    } on VocabularyException {
+      rethrow;
+    } catch (e, s) {
+      developer.log(
+        "Lỗi khi nhập từ vựng từ chuỗi JSON",
+        name: _logName,
+        error: e,
+        stackTrace: s,
+      );
+      throw VocabularyException("Lỗi phân tích chuỗi JSON: ${e.toString()}");
+    }
   }
 }

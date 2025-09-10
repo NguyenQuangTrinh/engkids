@@ -1,3 +1,5 @@
+// lib/service/database_service.dart
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,6 +32,7 @@ class DatabaseManager {
   static const String columnItemTerm = 'term';
   static const String columnItemDefinition = 'definition';
   static const String columnItemExample = 'exampleSentence';
+  static const String columnItemPartOfSpeech = 'part_of_speech';
   static const String columnItemPhonetic = 'phonetic';
   static const String columnItemDateAdded = 'dateAdded'; // Chung
 
@@ -60,27 +63,21 @@ class DatabaseManager {
       path,
       version: _databaseVersion,
       onCreate: _onCreate,
-      // onUpgrade: _onUpgrade,
+      onUpgrade: _onUpgrade,
     );
   }
 
   // Thêm hàm _onUpgrade vào DatabaseManager
-  // Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-  //   developer.log("Nâng cấp database từ version $oldVersion lên $newVersion", name: _logName);
-  //   if (oldVersion < 4) {
-  //     await db.execute('''
-  //     CREATE TABLE $tableHighScores (
-  //       $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
-  //       $columnGameType TEXT NOT NULL,
-  //       $columnScore INTEGER NOT NULL,
-  //       $columnPlayerName TEXT,
-  //       $columnDateAchieved TEXT NOT NULL
-  //     )
-  //   ''');
-  //     developer.log("Đã nâng cấp: Tạo bảng $tableHighScores", name: _logName);
-  //   }
-  //   // Nếu có version 3, bạn sẽ thêm: if (oldVersion < 3) { /* ... */ }
-  // }
+Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  developer.log("Nâng cấp database từ version $oldVersion lên $newVersion", name: _logName);
+  if (oldVersion < 3) {
+    // Lệnh thêm cột cho người dùng cũ
+    await db.execute(
+      'ALTER TABLE $tableVocabularyItems ADD COLUMN $columnItemPartOfSpeech TEXT'
+    );
+    developer.log("Đã nâng cấp: Thêm cột $columnItemPartOfSpeech", name: _logName);
+  }
+}
 
   Future<void> _onCreate(Database db, int version) async {
     developer.log("Đang tạo các bảng trong database...", name: _logName);
@@ -115,6 +112,7 @@ class DatabaseManager {
         $columnItemTerm TEXT NOT NULL,
         $columnItemDefinition TEXT NOT NULL,
         $columnItemExample TEXT,
+        $columnItemPartOfSpeech TEXT,
         $columnItemPhonetic TEXT,
         $columnItemDateAdded TEXT NOT NULL,
         FOREIGN KEY ($columnItemSetId) REFERENCES $tableVocabularySets ($columnSetId) ON DELETE CASCADE

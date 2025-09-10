@@ -1,4 +1,5 @@
 // lib/screens/vocabulary/flashcard_screen.dart
+
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 import '../../../models/flashcard_item_model.dart';
@@ -27,19 +28,25 @@ class FlashcardScreenState extends State<FlashcardScreen> {
   void initState() {
     super.initState();
     if (widget.flashcards.isEmpty) {
-      developer.log("Danh sách flashcards rỗng!", name: _logName, error: "Empty flashcards list passed");
+      developer.log(
+        "Danh sách flashcards rỗng!",
+        name: _logName,
+        error: "Empty flashcards list passed",
+      );
       // Có thể pop về hoặc hiển thị thông báo
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Không có thẻ nào để học trong bộ này."), backgroundColor: Colors.orange),
+            const SnackBar(
+              content: Text("Không có thẻ nào để học trong bộ này."),
+              backgroundColor: Colors.orange,
+            ),
           );
         }
       });
     }
   }
-
 
   void _nextCard() {
     if (_currentIndex < widget.flashcards.length - 1) {
@@ -50,7 +57,10 @@ class FlashcardScreenState extends State<FlashcardScreen> {
     } else {
       // Đã đến thẻ cuối cùng, có thể hiển thị thông báo hoặc nút hoàn thành
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bạn đã xem hết thẻ!"), duration: Duration(seconds: 1)),
+        const SnackBar(
+          content: Text("Bạn đã xem hết thẻ!"),
+          duration: Duration(seconds: 1),
+        ),
       );
     }
   }
@@ -85,9 +95,12 @@ class FlashcardScreenState extends State<FlashcardScreen> {
         mainAxisAlignment: MainAxisAlignment.center, // Căn giữa thẻ và controls
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded( // Để FlashcardView chiếm không gian lớn nhất có thể
-            child: Center( // Căn giữa FlashcardView
+          Expanded(
+            // Để FlashcardView chiếm không gian lớn nhất có thể
+            child: Center(
+              // Căn giữa FlashcardView
               child: FlashcardViewWidget(
+                key: ValueKey(currentCard.id),
                 cardItem: currentCard,
               ),
             ),
@@ -98,7 +111,9 @@ class FlashcardScreenState extends State<FlashcardScreen> {
             onPrevious: _previousCard,
             onNext: _nextCard,
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 10), // Đệm dưới cùng
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom + 10,
+          ), // Đệm dưới cùng
         ],
       ),
     );

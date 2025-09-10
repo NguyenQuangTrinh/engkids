@@ -1,3 +1,5 @@
+// lib/widgets/home/tools_support_section.dart
+
 import 'package:flutter/material.dart';
 import 'feature_button_small.dart'; // Import FeatureButtonSmall
 

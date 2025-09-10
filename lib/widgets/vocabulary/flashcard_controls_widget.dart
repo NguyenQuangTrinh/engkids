@@ -1,4 +1,5 @@
 // lib/widgets/vocabulary/flashcard_controls_widget.dart
+
 import 'package:flutter/material.dart';
 
 class FlashcardControlsWidget extends StatelessWidget {

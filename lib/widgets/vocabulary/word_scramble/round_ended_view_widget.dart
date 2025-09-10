@@ -1,3 +1,5 @@
+// lib/widgets/vocabulary/word_scramble/round_ended_view_widget.dart
+
 import 'package:flutter/material.dart';
 
 class RoundEndedViewWidget extends StatelessWidget {
