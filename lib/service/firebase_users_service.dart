@@ -31,6 +31,9 @@ class FirebaseUsersService {
       return [];
     }
 
+    // this is a range query to perform "startsWith" search
+    // s
+
     // Tìm kiếm các tên bắt đầu bằng chuỗi truy vấn, và loại trừ người dùng hiện tại
     final snapshot =
         await _firestore
